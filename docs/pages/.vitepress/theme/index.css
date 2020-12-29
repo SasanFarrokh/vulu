@@ -1,0 +1,18 @@
+.input {
+    padding: 0.875rem 1rem;
+    border: 1px solid #CCC;
+    outline: none;
+    font-size: 1.25rem;
+    border-radius: 4px;
+    color: #333;
+    display: block;
+    margin-bottom: 0.5rem;
+
+    &:focus {
+      border-color: #555;
+    }
+}
+
+.text-danger {
+    color: #e24d4d;
+}

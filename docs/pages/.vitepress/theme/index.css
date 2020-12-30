@@ -7,12 +7,47 @@
     color: #333;
     display: block;
     margin-bottom: 0.5rem;
+    background-color: transparent;
+    width: 100%;
 
     &:focus {
       border-color: #555;
     }
 }
 
+.button {
+    border: 2px solid #42b983;
+    color: #42b983;
+    background-color: transparent;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none !important;
+}
+
+.input-danger {
+    & > .input {
+        border-color: red;
+    }
+
+    & > span, & > .input {
+        color: red;
+    }
+}
+
 .text-danger {
     color: #e24d4d;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+hr {
+    margin: 4rem 0;
+    border-top: 1px solid #e0e0e0;
+    border-width: 1px 0 0 0;
+    background-color: transparent;
 }

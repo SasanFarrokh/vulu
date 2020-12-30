@@ -1,2 +1,4 @@
 export { useValidator } from './validator';
-export { Validator } from './components/Validator';
+export { useValidatorContext } from './validatorContext';
+export { Validator } from './components/ValidatorComponent';
+export { VULU } from './utils';

@@ -1,6 +1,8 @@
 <template>
   <div :class="error ? 'input-danger' : ''">
-    <input class="input" type="text" v-model="value" v-bind="$attrs">
+    <select class="input" v-model="value" v-bind="$attrs">
+      <slot />
+    </select>
     <span class="mb-4">
       {{ error }}
     </span>
@@ -17,7 +19,7 @@ export default {
     error: {
       default() {
         const v = inject(VULU, null)
-        return computed(() => v ? v.errors[0] : v);
+        return computed(() => v ? v.errors.join(', ') : v);
       }
     }
   },

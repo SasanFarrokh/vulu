@@ -1,8 +1,9 @@
 import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly } from 'vue';
-import { flatten, isPlainObject, warn } from './utils';
+import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
 import { Validation, ValidatorFn, ValidatorOptions } from './types';
+import {defaultOptions} from './defaults';
 
-const validate = async (value: unknown, validators: ValidatorFn[], options: Partial<ValidatorOptions>) => {
+const validate = async (field: string, value: unknown, validators: ValidatorFn[], options: ValidatorOptions) => {
     const failedRules: Record<string, string[]> = {};
 
     for (let i = 0; i < validators.length; i++) {
@@ -12,8 +13,12 @@ const validate = async (value: unknown, validators: ValidatorFn[], options: Part
 
         let result = await validator(value);
 
+        if (result === false) {
+            result = options.message || ' ';
+        }
+
         if (result != null && result !== true) {
-            result = typeof result === 'boolean' ? (options.defaultMessage || '') : result;
+            result = ([] as string[]).concat(result).map(str => options.interpolator(str, field));
             failedRules[vname] = (failedRules[vname] || []).concat(result);
 
             if (options.bails) {
@@ -29,6 +34,7 @@ const validate = async (value: unknown, validators: ValidatorFn[], options: Part
 const getValue = (value: WatchSource<unknown>) => typeof value === 'function' ? value() : value.value;
 
 export function useValidator(
+    name: string,
     value: WatchSource<unknown>,
     validators: Record<string, ValidatorFn> | ValidatorFn[] | ValidatorFn,
     options: Partial<ValidatorOptions> = {},
@@ -40,9 +46,10 @@ export function useValidator(
             return fn;
         });
     }
+    options = { ...defaultOptions, ...options };
 
     const validatorsArray = ([] as ValidatorFn[]).concat(validators);
-    
+
     const v: Validation = reactive({
         errors: [] as string[],
         failedRules: {} as Record<string, string[]>,
@@ -62,29 +69,41 @@ export function useValidator(
             v.reset();
             v.pending = true;
             try {
-                const { failedRules } = await validate(currentValue, validatorsArray, options);
+                const { failedRules } = await validate(name, currentValue, validatorsArray, options as ValidatorOptions);
                 v.pending = false;
 
                 if (currentValue != getValue(value)) {
-                    return;
+                    return true;
                 }
 
                 v.validated = true;
                 v.failedRules = failedRules;
+                return Object.keys(failedRules).length === 0;
             } catch (err) {
                 v.pending = false;
                 warn(err.message);
             }
+            return false;
         },
         touch() {
             v.dirty = true;
         },
-    });
+        setErrors(errors) {
+            v.dirty = true;
+            v.failedRules = isPlainObject(errors) ? errors : { '': v.errors = ([] as string[]).concat(errors) };
+        }
+    } as Validation);
 
     watchEffect(() => {
         v.errors = v.dirty ? flatten<string>(Object.values(v.failedRules)) : [];
         v.invalid = v.errors.length > 0;
     }, { flush: 'sync' });
+
+    // context;
+    const context = injectVuluContext();
+    if (context) {
+        context.addValidation(name, v);
+    }
 
     if (!options.interaction) {
         // Simple value watch
@@ -96,7 +115,6 @@ export function useValidator(
         });
     } else {
         // Based on Element UX
-        let validatedValue: unknown = {};
         v.on = {
             async input(e) {
                 const target = e.target as HTMLInputElement;
@@ -110,11 +128,9 @@ export function useValidator(
                 let shouldValidate = false;
                 shouldValidate = shouldValidate || options.interaction === 'aggressive';
                 shouldValidate = shouldValidate || options.interaction === 'eager' && v.errors.length > 0;
-                shouldValidate = shouldValidate && validatedValue !== getValue(value);
 
                 if (shouldValidate) {
                     await v.validate();
-                    validatedValue = getValue(value);
                 }
             },
             async change() {
@@ -124,11 +140,9 @@ export function useValidator(
                 shouldValidate = shouldValidate || options.interaction === 'lazy';
                 shouldValidate = shouldValidate || options.interaction === 'eager' && v.errors.length === 0;
                 shouldValidate = shouldValidate || options.interaction === 'aggressive';
-                shouldValidate = shouldValidate && validatedValue !== getValue(value);
 
                 if (shouldValidate) {
                     await v.validate();
-                    validatedValue = getValue(value);
                 }
             }
         };

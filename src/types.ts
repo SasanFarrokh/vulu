@@ -11,13 +11,14 @@ export type ValidatorFn = {
 
 type BaseValidatorOptions = {
     bails: boolean;
-    defaultMessage: string;
+    message: string;
     immediate: boolean;
+    model: string;
+    interpolator: (msg: string, field: string) => string;
 }
 
 export type ValidatorOptions = BaseValidatorOptions & ({
     interaction: 'aggressive' | 'lazy' | 'eager';
-    element: WatchSource<HTMLElement>;
 } | {
     interaction?: false;
 })
@@ -33,8 +34,16 @@ export type Validation = {
     validated: boolean;
 
     reset: () => void;
-    validate: () => Promise<void>,
+    validate: () => Promise<boolean>,
     touch: () => void,
+    setErrors: (errors: string | string[] | Record<string, string[]>) => void,
     
     on?: Record<string, EventListener>
 }
+
+export type ValidationContext = {
+    validations: Record<string, Validation>;
+    validate<T>(fn: () => T): Promise<T | undefined>;
+    addValidation(name: string, validation: Validation): void;
+    errors: Record<string, string[]>;
+};

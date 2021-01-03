@@ -53,6 +53,7 @@ module.exports = {
                     text: 'Examples',
                     children: [
                         { text: 'Simple Input', link: '/guide/examples/simple-input' },
+                        { text: 'Composition Api', link: '/guide/examples/composition-api' },
                     ]
                 },
             ]

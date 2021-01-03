@@ -1,4 +1,4 @@
-import {defineComponent, provide, ref, watch, VNode, Ref} from 'vue';
+import {defineComponent, provide, ref, VNode, nextTick} from 'vue';
 import { useValidator } from '../validator';
 import { extendEventHandlers, propToListener, VULU, warn } from '../utils';
 import {ValidatorOptions} from '../types';
@@ -6,17 +6,23 @@ import {defaultOptions} from '../defaults';
 
 
 export const Validator = defineComponent({
-    props: ['modelValue', 'validators', 'name'],
+    props: {
+        modelValue: null,
+        validators: null,
+        name: null,
+        immediate: { type: Boolean, default: defaultOptions.immediate },
+        optional: { type: Boolean, default: defaultOptions.optional },
+    },
     inheritAttrs: false,
-    setup(props, { slots, attrs }) {
+    setup(props, { attrs }) {
         const modelValue = typeof props.modelValue === 'undefined' ? ref(null) : ref(props.modelValue);
 
         const options: ValidatorOptions = {
-            interaction: 'aggressive',
             ...defaultOptions,
+            interaction: 'aggressive',
             ...attrs,
-            model: 'modelValue',
-            immediate: typeof attrs.immediate !== 'undefined' || defaultOptions.immediate
+            immediate: props.immediate,
+            optional: props.optional,
         };
 
         const v = useValidator(props.name, modelValue, props.validators, options);
@@ -24,8 +30,10 @@ export const Validator = defineComponent({
         provide(VULU, v);
 
         if (options.immediate) {
-            v.touch();
-            v.validate();
+            nextTick(() => {
+                v.touch();
+                v.validate();
+            });
         }
 
         return {
@@ -49,6 +57,9 @@ export const Validator = defineComponent({
                 },
                 ...propToListener(this.v.on!),
             });
+            if (vnode.props.modelValue) {
+                (this.modelValue as unknown) = vnode.props.modelValue;
+            }
             return vnode;
         });
     },

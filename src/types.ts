@@ -6,7 +6,7 @@ export type ValidatorFnResult = Promise<ValidatorFnResultSync> | ValidatorFnResu
 
 export type ValidatorFn = {
     (value: unknown): ValidatorFnResult;
-    vname: string;
+    vname?: string;
 }
 
 type BaseValidatorOptions = {
@@ -15,6 +15,7 @@ type BaseValidatorOptions = {
     immediate: boolean;
     model: string;
     interpolator: (msg: string, field: string) => string;
+    optional: boolean;
 }
 
 export type ValidatorOptions = BaseValidatorOptions & ({

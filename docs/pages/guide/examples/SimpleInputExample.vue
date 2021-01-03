@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <Validator name="email" :validators="inputValidator" v-slot="{ errors, on, dirty }" interaction="aggressive" immediate>
+    <Validator name="email" :validators="inputValidator" v-slot="{ errors, on, dirty }" interaction="aggressive" immediate optional>
       <Input v-model="inputValue" />
     </Validator>
 

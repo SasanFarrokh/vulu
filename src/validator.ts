@@ -1,4 +1,4 @@
-import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly } from 'vue';
+import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, isReactive, computed } from 'vue';
 import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
 import { Validation, ValidatorFn, ValidatorOptions } from './types';
 import {defaultOptions} from './defaults';
@@ -6,23 +6,25 @@ import {defaultOptions} from './defaults';
 const validate = async (field: string, value: unknown, validators: ValidatorFn[], options: ValidatorOptions) => {
     const failedRules: Record<string, string[]> = {};
 
-    for (let i = 0; i < validators.length; i++) {
-        const validator = validators[i];
-        const vname = validator.vname || validator.name;
-        if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
+    if (!options.optional || ([null, '', undefined] as unknown[]).indexOf(value) === -1) {
+        for (let i = 0; i < validators.length; i++) {
+            const validator = validators[i];
+            const vname = validator.vname || validator.name;
+            if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
 
-        let result = await validator(value);
+            let result = await validator(value);
 
-        if (result === false) {
-            result = options.message || ' ';
-        }
+            if (result === false) {
+                result = options.message || ' ';
+            }
 
-        if (result != null && result !== true) {
-            result = ([] as string[]).concat(result).map(str => options.interpolator(str, field));
-            failedRules[vname] = (failedRules[vname] || []).concat(result);
+            if (result != null && result !== true) {
+                result = ([] as string[]).concat(result).map(str => options.interpolator(str, field));
+                failedRules[vname] = (failedRules[vname] || []).concat(result);
 
-            if (options.bails) {
-                break;
+                if (options.bails) {
+                    break;
+                }
             }
         }
     }
@@ -39,16 +41,16 @@ export function useValidator(
     validators: Record<string, ValidatorFn> | ValidatorFn[] | ValidatorFn,
     options: Partial<ValidatorOptions> = {},
 ): DeepReadonly<Validation> {
-    if (isPlainObject(validators)) {
-        validators = Object.keys(validators).map((key: string) => {
-            const fn = (validators as Record<string, ValidatorFn>)[key];
-            fn.vname = key;
-            return fn;
-        });
-    }
-    options = { ...defaultOptions, ...options };
-
-    const validatorsArray = ([] as ValidatorFn[]).concat(validators);
+    const validatorsArray = computed(() => {
+        if (isPlainObject(validators)) {
+            validators = Object.keys(validators).map((key: string) => {
+                const fn = (validators as Record<string, ValidatorFn>)[key];
+                fn.vname = key;
+                return fn;
+            });
+        }
+        return ([] as ValidatorFn[]).concat(validators);
+    });
 
     const v: Validation = reactive({
         errors: [] as string[],
@@ -69,9 +71,8 @@ export function useValidator(
             v.reset();
             v.pending = true;
             try {
-                const { failedRules } = await validate(name, currentValue, validatorsArray, options as ValidatorOptions);
+                const { failedRules } = await validate(name, currentValue, validatorsArray.value, { ...defaultOptions, ...options });
                 v.pending = false;
-
                 if (currentValue != getValue(value)) {
                     return true;
                 }
@@ -107,7 +108,7 @@ export function useValidator(
 
     if (!options.interaction) {
         // Simple value watch
-        watch(value, () => {
+        watch(isReactive(options) ? [value, options] : value, () => {
             v.touch();
             v.validate();
         }, {

@@ -38,5 +38,5 @@ export const extendEventHandlers = ({ ...props }: Record<string, unknown>, newPr
 export function injectVuluContext(): ValidationContext | null {
     const vm = getCurrentInstance() as ComponentInternalInstance & { provides: { [VULU_CONTEXT]: ValidationContext } };
 
-    return inject(VULU_CONTEXT, vm?.provides[VULU_CONTEXT] || null);
+    return vm ? inject(VULU_CONTEXT, vm?.provides[VULU_CONTEXT] || null) : null;
 }

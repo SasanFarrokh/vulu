@@ -5,6 +5,9 @@
   "module": "dist/index.mjs",
   "author": "Sasan Farrokh <sasan.farrokh@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/SasanFarrokh/vulu.git"
+  },
   "scripts": {
     "dev": "tsup src/index.ts --dts --format esm --watch",
     "build": "tsup src/index.ts --dts --format cjs,esm",

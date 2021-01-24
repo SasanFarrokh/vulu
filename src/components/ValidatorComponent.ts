@@ -1,4 +1,4 @@
-import {defineComponent, provide, ref, VNode, nextTick} from 'vue';
+import {defineComponent, provide, ref, VNode, nextTick} from 'vue-demi';
 import { useValidator } from '../validator';
 import { extendEventHandlers, propToListener, VULU, warn } from '../utils';
 import {ValidatorOptions} from '../types';
@@ -57,9 +57,9 @@ export const Validator = defineComponent({
                 },
                 ...propToListener(this.v.on!),
             });
-            if (vnode.props.modelValue) {
-                (this.modelValue as unknown) = vnode.props.modelValue;
-            }
+            // if (vnode.props.modelValue) {
+            //     (this.modelValue as unknown) = vnode.props.modelValue;
+            // }
             return vnode;
         });
     },

@@ -1,5 +1,5 @@
 import {Validation, ValidationContext} from './types';
-import {ComponentInternalInstance, getCurrentInstance, inject, InjectionKey} from 'vue';
+import {ComponentInternalInstance, getCurrentInstance, inject, InjectionKey} from 'vue-demi';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const isPlainObject = (x: unknown): x is Record<string, unknown> => String(x) === '[object Object]';

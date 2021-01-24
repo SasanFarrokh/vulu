@@ -1,4 +1,4 @@
-import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, isReactive, computed } from 'vue';
+import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, isReactive, computed, nextTick } from 'vue-demi';
 import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
 import { Validation, ValidatorFn, ValidatorOptions } from './types';
 import {defaultOptions} from './defaults';
@@ -73,9 +73,6 @@ export function useValidator(
             try {
                 const { failedRules } = await validate(name, currentValue, validatorsArray.value, { ...defaultOptions, ...options });
                 v.pending = false;
-                if (currentValue != getValue(value)) {
-                    return true;
-                }
 
                 v.validated = true;
                 v.failedRules = failedRules;
@@ -97,14 +94,8 @@ export function useValidator(
 
     watchEffect(() => {
         v.errors = v.dirty ? flatten<string>(Object.values(v.failedRules)) : [];
-        v.invalid = v.errors.length > 0;
+        v.invalid = !v.validated || v.errors.length > 0;
     }, { flush: 'sync' });
-
-    // context;
-    const context = injectVuluContext();
-    if (context) {
-        context.addValidation(name, v);
-    }
 
     if (!options.interaction) {
         // Simple value watch
@@ -112,7 +103,7 @@ export function useValidator(
             v.touch();
             v.validate();
         }, {
-            immediate: options.immediate
+            immediate: options.immediate,
         });
     } else {
         // Based on Element UX
@@ -124,29 +115,36 @@ export function useValidator(
                 }
 
                 v.dirty = true;
-                v.validated = false;
 
                 let shouldValidate = false;
                 shouldValidate = shouldValidate || options.interaction === 'aggressive';
                 shouldValidate = shouldValidate || options.interaction === 'eager' && v.errors.length > 0;
 
+
                 if (shouldValidate) {
+                    await nextTick();
                     await v.validate();
                 }
             },
             async change() {
                 v.dirty = true;
-                v.validated = false;
                 let shouldValidate = false;
                 shouldValidate = shouldValidate || options.interaction === 'lazy';
                 shouldValidate = shouldValidate || options.interaction === 'eager' && v.errors.length === 0;
                 shouldValidate = shouldValidate || options.interaction === 'aggressive';
 
                 if (shouldValidate) {
+                    await nextTick();
                     await v.validate();
                 }
             }
         };
+    }
+
+    // context;
+    const context = injectVuluContext();
+    if (context) {
+        context.addValidation(name, v);
     }
 
     return readonly(v);

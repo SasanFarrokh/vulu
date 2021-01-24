@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect } from 'vue-demi'
 import { Validator, useValidatorContext } from "vulu";
 import Input from '../../components/Input.vue'
 import Select from '../../components/Select.vue'

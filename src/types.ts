@@ -1,4 +1,4 @@
-import type { WatchSource, h } from 'vue';
+import type { WatchSource, h } from 'vue-demi';
 
 type ValidatorFnResultSync = boolean | string | string[]
 
@@ -38,7 +38,7 @@ export type Validation = {
     validate: () => Promise<boolean>,
     touch: () => void,
     setErrors: (errors: string | string[] | Record<string, string[]>) => void,
-    
+
     on?: Record<string, EventListener>
 }
 
@@ -47,4 +47,6 @@ export type ValidationContext = {
     validate<T>(fn: () => T): Promise<T | undefined>;
     addValidation(name: string, validation: Validation): void;
     errors: Record<string, string[]>;
+    allErrors: string[];
+    invalid: boolean;
 };

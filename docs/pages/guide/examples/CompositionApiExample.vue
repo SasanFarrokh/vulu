@@ -4,7 +4,7 @@
       <input id="checkbox" type="checkbox" v-model="options.optional">
       Optional
     </label>
-    <Input v-model.lazy="myValue" placeholder="Please enter your email" />
+    <Input v-model="myValue" placeholder="Please enter your email" />
     <span class="text-danger">
         {{ myValidator.errors[0] }}
     </span>
@@ -14,11 +14,12 @@
 <script setup>
 import Input from "../../components/Input.vue";
 import { useValidator } from 'vulu'
-import { ref, reactive } from 'vue'
+import { ref, reactive } from 'vue-demi'
 
-const options = reactive({ optional: true })
+const options = reactive({ optional: false, immediate: true })
 
 const myValue = ref(null)
+
 const myValidator = useValidator('email', myValue, {
   required: x => x ? true : 'Field $field is required',
   email: x => x.match(/.+@.+\..+/) ? true : 'Field $field should be in email format'

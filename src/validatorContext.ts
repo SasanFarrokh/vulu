@@ -1,8 +1,8 @@
 import {ValidationContext} from './types';
-import {provide, reactive, watchEffect} from 'vue';
+import {provide, reactive, watchEffect} from 'vue-demi';
 import {VULU_CONTEXT} from './utils';
 
-export function useValidatorContext () {
+export function useValidatorContext (): ValidationContext {
     const context: ValidationContext = reactive({
         validations: {},
         async validate(fn) {
@@ -24,14 +24,19 @@ export function useValidatorContext () {
 
     watchEffect(() => {
         context.errors = {};
+        context.allErrors = [];
+        context.invalid = false;
         Object.keys(context.validations).forEach(key => {
-            if (context.validations[key].errors.length) {
-                context.errors[key] = context.validations[key].errors;
+            const validation = context.validations[key];
+            if (validation.errors.length) {
+                const errors = context.errors[key] = validation.errors;
+                context.allErrors = context.allErrors.concat(errors);
             }
+            context.invalid = context.invalid || validation.invalid;
         });
     });
-    
+
     provide(VULU_CONTEXT, context);
-    
+
     return context;
 }

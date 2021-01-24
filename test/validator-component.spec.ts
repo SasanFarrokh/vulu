@@ -1,4 +1,4 @@
-import { ref, Ref, nextTick, h } from 'vue';
+import { ref, Ref, nextTick, h } from 'vue-demi';
 import { Validator } from '../src';
 import {Validation, ValidatorFn} from '../src/types';
 import { shallowMount } from '@vue/test-utils';

@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { inject, computed, unref } from 'vue';
+import { inject, computed, unref } from 'vue-demi';
 import { VULU } from 'vulu';
 
 export default {

@@ -1,16 +1,16 @@
 {
   "name": "vulu",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "module": "dist/esm/index.js",
   "author": "Sasan Farrokh <sasan.farrokh@gmail.com>",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/SasanFarrokh/vulu.git"
   },
   "scripts": {
-    "dev": "tsup src/index.ts --dts --format esm --watch",
-    "build": "tsup src/index.ts --dts --format cjs,esm",
+    "dev": "tsup src/index.ts --dts --format esm --watch --legacy-output",
+    "build": "tsup src/index.ts --dts --format cjs,esm --legacy-output",
     "test": "jest",
     "example": "pnpm --filter vulu-example dev"
   },

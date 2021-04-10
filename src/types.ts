@@ -1,11 +1,9 @@
-import type { WatchSource, h } from 'vue-demi';
-
 type ValidatorFnResultSync = boolean | string | string[]
 
 export type ValidatorFnResult = Promise<ValidatorFnResultSync> | ValidatorFnResultSync
 
 export type ValidatorFn = {
-    (value: unknown): ValidatorFnResult;
+    (value: unknown, crossValues?: unknown): ValidatorFnResult;
     vname?: string;
 }
 
@@ -16,6 +14,7 @@ type BaseValidatorOptions = {
     model: string;
     interpolator: (msg: string, field: string) => string;
     optional: boolean;
+    crossValues: unknown
 }
 
 export type ValidatorOptions = BaseValidatorOptions & ({

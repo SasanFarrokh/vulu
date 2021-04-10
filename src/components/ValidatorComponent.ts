@@ -8,6 +8,7 @@ import {defaultOptions} from '../defaults';
 export const Validator = defineComponent({
     props: {
         modelValue: null,
+        crossValues: null,
         validators: null,
         name: null,
         immediate: { type: Boolean, default: defaultOptions.immediate },
@@ -23,6 +24,7 @@ export const Validator = defineComponent({
             ...attrs,
             immediate: props.immediate,
             optional: props.optional,
+            crossValues: props.crossValues
         };
 
         const v = useValidator(props.name, modelValue, props.validators, options);

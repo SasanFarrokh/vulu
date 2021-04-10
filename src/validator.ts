@@ -12,7 +12,7 @@ const validate = async (field: string, value: unknown, validators: ValidatorFn[]
             const vname = validator.vname || validator.name;
             if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
 
-            let result = await validator(value);
+            let result = await validator(value, options.crossValues);
 
             if (result === false) {
                 result = options.message || ' ';
@@ -93,13 +93,14 @@ export function useValidator(
     } as Validation);
 
     watchEffect(() => {
-        v.errors = v.dirty ? flatten<string>(Object.values(v.failedRules)) : [];
-        v.invalid = !v.validated || v.errors.length > 0;
+        const errors = flatten<string>(Object.values(v.failedRules));
+        v.errors = v.dirty ? errors : [];
+        v.invalid = !v.validated || errors.length > 0;
     }, { flush: 'sync' });
 
     if (!options.interaction) {
         // Simple value watch
-        watch(isReactive(options) ? [value, options] : value, () => {
+        watch(isReactive(options) ? [options, value] : value, () => {
             v.touch();
             v.validate();
         }, {
@@ -114,17 +115,17 @@ export function useValidator(
                     if (target.tagName === 'SELECT') return;
                 }
 
-                v.dirty = true;
-
-                let shouldValidate = false;
-                shouldValidate = shouldValidate || options.interaction === 'aggressive';
-                shouldValidate = shouldValidate || options.interaction === 'eager' && v.errors.length > 0;
+                let shouldTouch = false;
+                shouldTouch = shouldTouch || options.interaction === 'aggressive';
+                shouldTouch = shouldTouch || options.interaction === 'eager' && v.errors.length > 0;
 
 
-                if (shouldValidate) {
-                    await nextTick();
-                    await v.validate();
+                if (shouldTouch) {
+                    v.touch();
                 }
+
+                await nextTick();
+                await v.validate();
             },
             async change() {
                 v.dirty = true;

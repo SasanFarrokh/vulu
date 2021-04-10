@@ -7,6 +7,7 @@ export const defaultOptions: ValidatorOptions = {
     model: 'modelValue',
     interaction: false,
     immediate: false,
+    crossValues: undefined,
     interpolator: (str, field) => str.replace('$field', field),
 };
 

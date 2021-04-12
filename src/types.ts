@@ -3,9 +3,11 @@ type ValidatorFnResultSync = boolean | string | string[]
 export type ValidatorFnResult = Promise<ValidatorFnResultSync> | ValidatorFnResultSync
 
 export type ValidatorFn = {
-    (value: unknown, crossValues?: unknown): ValidatorFnResult;
+    (value: unknown, crossValues?: any): ValidatorFnResult;
     vname?: string;
 }
+
+export type Validators = Record<string, ValidatorFn> | ValidatorFn[] | ValidatorFn
 
 type BaseValidatorOptions = {
     bails: boolean;
@@ -14,7 +16,7 @@ type BaseValidatorOptions = {
     model: string;
     interpolator: (msg: string, field: string) => string;
     optional: boolean;
-    crossValues: unknown
+    crossValues: any
 }
 
 export type ValidatorOptions = BaseValidatorOptions & ({
@@ -43,7 +45,7 @@ export type Validation = {
 
 export type ValidationContext = {
     validations: Record<string, Validation>;
-    validate<T>(fn: () => T): Promise<T | undefined>;
+    validate<T>(fn?: () => T): Promise<T | boolean | undefined>;
     addValidation(name: string, validation: Validation): void;
     errors: Record<string, string[]>;
     allErrors: string[];

@@ -6,15 +6,16 @@ export function useValidatorContext (): ValidationContext {
     const context: ValidationContext = reactive({
         validations: {},
         async validate(fn) {
-            const booleans = await Promise.all(
+            const isValid = (await Promise.all(
                 Object.values(context.validations).map(v => {
                     v.touch();
                     return v.validate();
                 })
-            );
-            if (booleans.indexOf(false) === -1) {
+            )).indexOf(false) === -1;
+            if (isValid && typeof fn === 'function') {
                 return fn();
             }
+            return isValid;
         },
         addValidation(name, v) {
             context.validations[name] = v;

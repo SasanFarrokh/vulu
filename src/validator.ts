@@ -1,6 +1,6 @@
-import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, isReactive, computed, nextTick } from 'vue-demi';
+import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, unref } from 'vue-demi';
 import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
-import { Validation, ValidatorFn, ValidatorOptions } from './types';
+import {Validation, ValidatorFn, ValidatorOptions, Validators} from './types';
 import {defaultOptions} from './defaults';
 
 const validate = async (field: string, value: unknown, validators: ValidatorFn[], options: ValidatorOptions) => {
@@ -12,7 +12,7 @@ const validate = async (field: string, value: unknown, validators: ValidatorFn[]
             const vname = validator.vname || validator.name;
             if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
 
-            let result = await validator(value, options.crossValues);
+            let result = await validator(value, unref(options.crossValues));
 
             if (result === false) {
                 result = options.message || ' ';
@@ -38,7 +38,7 @@ const getValue = (value: WatchSource<unknown>) => typeof value === 'function' ? 
 export function useValidator(
     name: string,
     value: WatchSource<unknown>,
-    validators: Record<string, ValidatorFn> | ValidatorFn[] | ValidatorFn,
+    validators: Validators,
     options: Partial<ValidatorOptions> = {},
 ): DeepReadonly<Validation> {
     const validatorsArray = computed(() => {
@@ -59,7 +59,7 @@ export function useValidator(
 
         pending: false,
         invalid: false,
-        dirty: false,
+        dirty: options.immediate,
         validated: false,
 
         reset: () => {
@@ -76,7 +76,14 @@ export function useValidator(
 
                 v.validated = true;
                 v.failedRules = failedRules;
-                return Object.keys(failedRules).length === 0;
+
+                const isValid = Object.keys(failedRules).length === 0;
+
+                if (isValid) {
+                    v.dirty = false;
+                }
+
+                return isValid;
             } catch (err) {
                 v.pending = false;
                 warn(err.message);
@@ -98,46 +105,25 @@ export function useValidator(
         v.invalid = !v.validated || errors.length > 0;
     }, { flush: 'sync' });
 
-    if (!options.interaction) {
-        // Simple value watch
-        watch(isReactive(options) ? [options, value] : value, () => {
-            v.touch();
-            v.validate();
-        }, {
-            immediate: options.immediate,
-        });
-    } else {
+
+    watch(value, () => {
+        !options.interaction && v.touch();
+        options.interaction !== 'lazy' && v.validate();
+    });
+    if (options.interaction) {
         // Based on Element UX
         v.on = {
-            async input(e) {
-                const target = e.target as HTMLInputElement;
-                if (target) {
-                    if (target.tagName === 'SELECT') return;
-                }
-
-                let shouldTouch = false;
-                shouldTouch = shouldTouch || options.interaction === 'aggressive';
-                shouldTouch = shouldTouch || options.interaction === 'eager' && v.errors.length > 0;
-
-
-                if (shouldTouch) {
+            input() {
+                if (options.interaction === 'aggressive') {
                     v.touch();
                 }
-
-                await nextTick();
-                await v.validate();
             },
-            async change() {
-                v.dirty = true;
-                let shouldValidate = false;
-                shouldValidate = shouldValidate || options.interaction === 'lazy';
-                shouldValidate = shouldValidate || options.interaction === 'eager' && v.errors.length === 0;
-                shouldValidate = shouldValidate || options.interaction === 'aggressive';
-
-                if (shouldValidate) {
-                    await nextTick();
-                    await v.validate();
-                }
+            change() {
+                v.touch();
+            },
+            blur() {
+                v.touch();
+                v.validate();
             }
         };
     }

@@ -1,4 +1,4 @@
-import {defineComponent, provide, ref, VNode, nextTick} from 'vue-demi';
+import {defineComponent, provide, ref, VNode, nextTick, toRefs} from 'vue-demi';
 import { useValidator } from '../validator';
 import { extendEventHandlers, propToListener, VULU, warn } from '../utils';
 import {ValidatorOptions} from '../types';
@@ -16,7 +16,9 @@ export const Validator = defineComponent({
     },
     inheritAttrs: false,
     setup(props, { attrs }) {
-        const modelValue = typeof props.modelValue === 'undefined' ? ref(null) : ref(props.modelValue);
+        const modelValue = typeof props.modelValue === 'undefined' ? ref(null) : () => props.modelValue;
+
+        const { crossValues } = toRefs(props);
 
         const options: ValidatorOptions = {
             ...defaultOptions,
@@ -24,7 +26,7 @@ export const Validator = defineComponent({
             ...attrs,
             immediate: props.immediate,
             optional: props.optional,
-            crossValues: props.crossValues
+            crossValues
         };
 
         const v = useValidator(props.name, modelValue, props.validators, options);
@@ -55,7 +57,9 @@ export const Validator = defineComponent({
 
             vnode.props = extendEventHandlers(vnode.props, {
                 [updateEvent]: (v: unknown) => {
-                    (this.modelValue as unknown) = v;
+                    if (typeof this.modelValue !== 'function') {
+                        (this.modelValue as unknown) = v;
+                    }
                 },
                 ...propToListener(this.v.on!),
             });

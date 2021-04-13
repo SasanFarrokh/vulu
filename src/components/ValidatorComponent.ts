@@ -5,7 +5,7 @@ import {ValidatorOptions} from '../types';
 import {defaultOptions} from '../defaults';
 
 
-export const Validator = defineComponent({
+export const Validator = /* #__PURE__ */ defineComponent({
     props: {
         modelValue: null,
         crossValues: null,

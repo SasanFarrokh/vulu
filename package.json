@@ -2,7 +2,7 @@
   "name": "vulu",
   "version": "0.0.5",
   "main": "dist/index.js",
-  "module": "dist/esm/index.js",
+  "module": "dist/index.js",
   "author": "Sasan Farrokh <sasan.farrokh@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "tsup src/index.ts --dts --format esm --watch --legacy-output",
     "build": "tsup src/index.ts --dts --format cjs,esm --legacy-output",
+    "build-tsc": "tsc",
     "test": "jest",
     "example": "pnpm --filter vulu-example dev"
   },

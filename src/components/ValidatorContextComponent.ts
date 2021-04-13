@@ -1,6 +1,6 @@
-import { h, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
-export const ValidatorContext = defineComponent({
+export const ValidatorContext = /* #__PURE__ */ defineComponent({
     setup(props, { slots }) {
         return () => slots.default?.();
     }

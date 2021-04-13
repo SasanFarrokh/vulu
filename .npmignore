@@ -1,0 +1,11 @@
+node_modules
+src
+coverage
+examples
+docs
+test
+.eslintrc.js
+jest.config.js
+pnpm-workspace.yaml
+todo
+tsconfig.json

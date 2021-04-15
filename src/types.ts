@@ -43,11 +43,13 @@ export type Validation = {
     on?: Record<string, EventListener>
 }
 
-export type ValidationContext = {
+export interface ValidationContext {
     validations: Record<string, Validation>;
+    contexts: ValidationContext[];
     validate<T>(fn?: () => T): Promise<T | boolean | undefined>;
     addValidation(name: string, validation: Validation): void;
+    addContext(context: ValidationContext): void;
     errors: Record<string, string[]>;
     allErrors: string[];
     invalid: boolean;
-};
+}

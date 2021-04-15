@@ -1,27 +1,35 @@
 import {ValidationContext} from './types';
-import {provide, reactive, watchEffect} from 'vue-demi';
+import {inject, provide, reactive, watchEffect} from 'vue-demi';
 import {VULU_CONTEXT} from './utils';
 
 export function useValidatorContext (): ValidationContext {
-    const context: ValidationContext = reactive({
+    const context = reactive<ValidationContext>({
         validations: {},
+        contexts: [],
         async validate(fn) {
-            const isValid = (await Promise.all(
-                Object.values(context.validations).map(v => {
-                    v.touch();
-                    return v.validate();
-                })
-            )).indexOf(false) === -1;
+            const isValid: boolean = (
+                await Promise.all([
+                    ...Object.values(this.validations).map(v => {
+                        v.touch();
+                        return v.validate();
+                    }),
+                    ...this.contexts.map(ctx => ctx.validate())
+                ])).indexOf(false) === -1;
             if (isValid && typeof fn === 'function') {
                 return fn();
             }
             return isValid;
         },
         addValidation(name, v) {
-            context.validations[name] = v;
+            this.validations[name] = v;
         },
-        errors: {}
-    } as ValidationContext);
+        addContext(ctx) {
+            this.contexts.push(ctx);
+        },
+        allErrors: [],
+        errors: {},
+        invalid: true
+    });
 
     watchEffect(() => {
         context.errors = {};
@@ -35,7 +43,16 @@ export function useValidatorContext (): ValidationContext {
             }
             context.invalid = context.invalid || validation.invalid;
         });
+        context.contexts.forEach(ctx => {
+            context.allErrors = context.allErrors.concat(ctx.allErrors);
+            context.invalid = context.invalid || ctx.invalid;
+        });
     });
+
+    const parentContext = inject<ValidationContext | null>(VULU_CONTEXT, null);
+    if (parentContext) {
+        parentContext.addContext(context);
+    }
 
     provide(VULU_CONTEXT, context);
 

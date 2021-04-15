@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6-alpha.2](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.1...v0.0.6-alpha.2) (2021-04-15)
+
+
+### Features
+
+* add nested context support ([ca26898](https://github.com/SasanFarrokh/vulu/commit/ca26898a7cd55a7957ccf877010e641ada4ad847))
+
 ### 0.0.6-alpha.1 (2021-04-14)
 
 

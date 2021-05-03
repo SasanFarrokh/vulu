@@ -1,6 +1,6 @@
 {
   "name": "vulu",
-  "version": "0.0.6-alpha.2",
+  "version": "0.0.6-alpha.3",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "author": "Sasan Farrokh <sasan.farrokh@gmail.com>",

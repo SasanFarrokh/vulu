@@ -1,15 +1,28 @@
-import typescript from '@rollup/plugin-typescript';
+import typescript from '@wessberg/rollup-plugin-ts';
 
-export default {
+const config = {
     input: './src/index.ts',
-    output: [{
-        file: 'dist/index.js',
-        format: 'cjs',
-    }, {
-        file: 'dist/index.esm.js',
-        format: 'esm',
-    }],
     plugins: [
-        typescript()
+        typescript({})
     ]
 };
+
+export default [
+    {
+        ...config,
+        output: {
+            file: 'dist/index.js',
+            format: 'cjs',
+        }
+    },
+    {
+        ...config,
+        output: {
+            file: 'dist/index.esm.js',
+            format: 'esm',
+        },
+        plugins: [
+            typescript({ tsconfig: cnf => ({ ...cnf, declaration: false }) })
+        ]
+    }
+];

@@ -49,6 +49,7 @@ export interface ValidationContext {
     validate<T>(fn?: () => T): Promise<T | boolean | undefined>;
     addValidation(name: string, validation: Validation): void;
     addContext(context: ValidationContext): void;
+    removeContext(context: ValidationContext): void;
     errors: Record<string, string[]>;
     allErrors: string[];
     invalid: boolean;

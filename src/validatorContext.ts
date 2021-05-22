@@ -1,5 +1,5 @@
 import {ValidationContext} from './types';
-import {inject, provide, reactive, watchEffect} from 'vue-demi';
+import {inject, provide, reactive, watchEffect, onBeforeUnmount} from 'vue-demi';
 import {VULU_CONTEXT} from './utils';
 
 export function useValidatorContext (): ValidationContext {
@@ -25,6 +25,10 @@ export function useValidatorContext (): ValidationContext {
         },
         addContext(ctx) {
             this.contexts.push(ctx);
+        },
+        removeContext(ctx) {
+            const i = this.contexts.indexOf(ctx);
+            i >= 0 && this.contexts.splice(i, 1);
         },
         allErrors: [],
         errors: {},
@@ -53,6 +57,10 @@ export function useValidatorContext (): ValidationContext {
     if (parentContext) {
         parentContext.addContext(context);
     }
+
+    onBeforeUnmount(() => {
+        parentContext?.removeContext(context);
+    });
 
     provide(VULU_CONTEXT, context);
 

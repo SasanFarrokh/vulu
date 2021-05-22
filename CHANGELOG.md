@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6-alpha.5](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.4...v0.0.6-alpha.5) (2021-05-22)
+
 ### [0.0.6-alpha.4](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.2...v0.0.6-alpha.4) (2021-05-07)
 
 ### [0.0.6-alpha.3](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.2...v0.0.6-alpha.3) (2021-05-03)

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.6-alpha.5](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.4...v0.0.6-alpha.5) (2021-05-22)
 
+
+### Bug Fixes
+
+* remove context on unmount ([4c2173d](https://github.com/SasanFarrokh/vulu/commit/4c2173dad08000ef982a7d6639bd83fd766ea345))
+
+### [0.0.6-alpha.5](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.4...v0.0.6-alpha.5) (2021-05-22)
+
 ### [0.0.6-alpha.4](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.2...v0.0.6-alpha.4) (2021-05-07)
 
 ### [0.0.6-alpha.3](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.2...v0.0.6-alpha.3) (2021-05-03)

@@ -10,7 +10,7 @@
     "url": "https://github.com/SasanFarrokh/vulu.git"
   },
   "scripts": {
-    "dev": "tsc --watch",
+    "dev": "rollup -c rollup.config.js -w",
     "build": "rollup -c rollup.config.js",
     "release": "standard-version -a --prerelease alpha && git push --follow-tags",
     "test": "jest",

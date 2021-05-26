@@ -23,6 +23,9 @@ export function useValidatorContext (): ValidationContext {
         addValidation(name, v) {
             this.validations[name] = v;
         },
+        removeValidation(name) {
+            delete this.validations[name];
+        },
         addContext(ctx) {
             this.contexts.push(ctx);
         },

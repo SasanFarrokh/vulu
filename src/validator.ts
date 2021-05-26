@@ -1,4 +1,4 @@
-import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, unref } from 'vue-demi';
+import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, onBeforeUnmount } from 'vue-demi';
 import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
 import {Validation, ValidatorFn, ValidatorOptions, Validators} from './types';
 import {defaultOptions} from './defaults';
@@ -12,7 +12,7 @@ const validate = async (field: string, value: unknown, validators: ValidatorFn[]
             const vname = validator.vname || validator.name;
             if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
 
-            let result = await validator(value, unref(options.crossValues));
+            let result = await validator(value, options.crossValues);
 
             if (result === false) {
                 result = options.message || ' ';
@@ -51,6 +51,7 @@ export function useValidator(
         }
         return ([] as ValidatorFn[]).concat(validators);
     });
+    validatorsArray.value;
 
     const v: Validation = reactive({
         errors: [] as string[],
@@ -67,6 +68,10 @@ export function useValidator(
         },
         validate: async () => {
             const currentValue = getValue(value);
+            if (!validatorsArray.value || !validatorsArray.value.length) {
+                warn('No validators assigned');
+                return true;
+            }
 
             v.reset();
             v.pending = true;
@@ -132,6 +137,9 @@ export function useValidator(
     const context = injectVuluContext();
     if (context) {
         context.addValidation(name, v);
+        onBeforeUnmount(() => {
+            context.removeValidation(name);
+        });
     }
 
     return readonly(v);

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6-alpha.6](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.5...v0.0.6-alpha.6) (2021-05-26)
+
+
+### Bug Fixes
+
+* on unmount and ... ([9242527](https://github.com/SasanFarrokh/vulu/commit/9242527389d6a743d0b16dcf58359e6b7cfe0fe1))
+
 ### [0.0.6-alpha.5](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.4...v0.0.6-alpha.5) (2021-05-22)
 
 

@@ -124,6 +124,7 @@ describe('useValidatorContext', () => {
         });
         expect(context!.contexts).toEqual([nestedContext]);
         expect(context!.invalid).toBeTruthy();
+        expect(await context!.validate()).toBeFalsy();
 
         expect(Object.keys(nestedContext!.validations)).toEqual([
             'requiredValueNested',
@@ -131,6 +132,7 @@ describe('useValidatorContext', () => {
             'emailValueNestedNested'
         ]);
 
+        // Unmount
         showGrandChild.value = false;
         await bigNextTick();
         expect(Object.keys(nestedContext!.validations)).toEqual([

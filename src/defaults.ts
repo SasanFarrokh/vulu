@@ -10,6 +10,6 @@ export const defaultOptions: ValidatorOptions = {
     interpolator: (str, field) => str.replace('$field', field),
 };
 
-export const setDefaultOptions = (options: Partial<ValidatorOptions>) => {
-    Object.assign(defaultOptions, options);
+export const setDefaultOptions = (options: Partial<ValidatorOptions>): ValidatorOptions => {
+    return Object.assign(defaultOptions, options);
 };

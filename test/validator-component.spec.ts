@@ -65,7 +65,7 @@ describe('ValidatorComponent', () => {
                             modelValue: String,
                         },
                         emits: ['update:modelValue'],
-                        setup(props: any, { emit }: any) {
+                        setup(props: Record<string, unknown>, { emit }: { emit: (ev: string, arg: unknown) => void }) {
                             const v = computed({
                                 get() {
                                     return props.modelValue;
@@ -74,11 +74,11 @@ describe('ValidatorComponent', () => {
                                     emit('update:modelValue', x);
                                 }
                             });
-                            return () => h('input', { value: v, onInput: (e: any) => v.value = e.target.value });
+                            return () => h('input', { value: v, onInput: (e: InputEvent) => v.value = (e.target as HTMLInputElement).value });
                         }
                     }, {
                         modelValue: value.value,
-                        'onUpdate:modelValue'(x: any) {
+                        'onUpdate:modelValue'(x: string) {
                             value.value = x;
                         }
                     });

@@ -1,6 +1,10 @@
 # vulu
+[![vuejs](https://img.shields.io/badge/Vue.js-3-brightgreen.svg)](https://v3.vuejs.org)
 [![codecov](https://codecov.io/gh/SasanFarrokh/vulu/branch/master/graph/badge.svg?token=5WP0XGR4TT)](https://codecov.io/gh/SasanFarrokh/vulu)
-[![npm](https://img.shields.io/npm/v/vulu?color=f75e5e&style=rounded)](https://npmjs.com/package/vulu)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/61f37f04273b4663a0b95e49e1be73b6)](https://www.codacy.com/gh/SasanFarrokh/vulu/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SasanFarrokh/vulu&amp;utm_campaign=Badge_Grade)
+[![npm downloads](https://img.shields.io/npm/dt/vulu.svg)](http://npm-stat.com/charts.html?package=vulu)
+[![npm](https://img.shields.io/npm/v/vulu?color=orange&style=rounded)](https://npmjs.com/package/vulu)
+[![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/vulu/latest)](https://bundlephobia.com/result?p=vulu@latest)
 
 Validation Plugin for [Vue 3](https://github.com/vuejs/vue-next)
 

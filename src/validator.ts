@@ -112,7 +112,7 @@ export function useValidator(
     if (!options.manual) {
         const validateAndWatch = () => watch(
             () => validate(name, getValue(value), validatorsArray.value, mergedOptions),
-            (t, f) => {
+            (t) => {
                 return onValidate(t);
             }, {
                 immediate: true

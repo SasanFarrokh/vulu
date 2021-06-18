@@ -85,7 +85,7 @@ describe('useValidatorContext', () => {
         const showGrandChild: Ref<boolean> = ref(true);
         const showChild: Ref<boolean> = ref(true);
 
-        const wrapper = setup(() => {
+        setup(() => {
             const requiredValue = ref<string | null>(null);
             const emailValue = ref('12');
 
@@ -102,8 +102,8 @@ describe('useValidatorContext', () => {
                     const emailValue = ref('12');
 
                     nestedContext = useValidatorContext();
-                    const requiredValidator = useValidator('requiredValueNested', requiredValue, required, {});
-                    const emailValidator = useValidator('emailValueNested', emailValue, email, {});
+                    useValidator('requiredValueNested', requiredValue, required, {});
+                    useValidator('emailValueNested', emailValue, email, {});
 
                     return () => showGrandChild.value ? h({
                         setup() {

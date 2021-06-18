@@ -9,7 +9,6 @@ export const Validator = /* #__PURE__ */ defineComponent({
     name: 'Validator',
     props: {
         modelValue: null,
-        crossValues: null,
         validators: null,
         name: null,
         immediate: { type: Boolean, default: defaultOptions.immediate },
@@ -17,7 +16,7 @@ export const Validator = /* #__PURE__ */ defineComponent({
         bails: { type: Boolean, default: defaultOptions.bails },
         message: { type: String, default: defaultOptions.message },
         interpolator: { type: Function, default: defaultOptions.interpolator },
-        interaction: { type: [String, Boolean], default: defaultOptions.interaction },
+        interaction: { type: [String, Boolean], default: 'eager' },
         model: { type: String, default: defaultOptions.model },
     },
     inheritAttrs: false,
@@ -39,13 +38,6 @@ export const Validator = /* #__PURE__ */ defineComponent({
 
         provide(VULU, v);
 
-        if (options.immediate) {
-            nextTick(() => {
-                v.touch();
-                v.validate();
-            });
-        }
-
         return {
             v,
             setErrors: v.setErrors,
@@ -58,14 +50,12 @@ export const Validator = /* #__PURE__ */ defineComponent({
 
         return this.$slots.default!({ ...this.v }).map((vnode: VNode, i, arr) => {
             arr.length === 1 && mergeVNodeProps(vnode, this.$attrs);
-            if (updateEvent in vnode.props!) {
+            if (typeof this.modelValue !== 'function' && updateEvent in (vnode.props || {})) {
                 mergeVNodeProps(vnode, {
                     [updateEvent]: (v: unknown) => {
-                        if (typeof this.modelValue !== 'function') {
-                            (this.modelValue as unknown) = v;
-                        }
+                        (this.modelValue as unknown) = v;
                     },
-                    ...propToListener(this.v.on!),
+                    // ...propToListener(this.v.on!),
                 });
                 return vnode;
             }

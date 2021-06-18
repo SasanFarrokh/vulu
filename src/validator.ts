@@ -1,4 +1,4 @@
-import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, onBeforeUnmount } from 'vue-demi';
+import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, onBeforeUnmount, unref } from 'vue-demi';
 import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
 import {Validation, ValidatorFn, ValidatorOptions, Validators} from './types';
 import {defaultOptions} from './defaults';
@@ -6,25 +6,26 @@ import {defaultOptions} from './defaults';
 const validate = async (field: string, value: unknown, validators: ValidatorFn[], options: ValidatorOptions) => {
     const failedRules: Record<string, string[]> = {};
 
-    if (!options.optional || ([null, '', undefined] as unknown[]).indexOf(value) === -1) {
-        for (let i = 0; i < validators.length; i++) {
-            const validator = validators[i];
-            const vname = validator.vname || validator.name;
-            if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
+    if (options.optional && ([null, '', undefined] as unknown[]).indexOf(value) >= 0) {
+        return { failedRules };
+    }
+    for (let i = 0; i < validators.length; i++) {
+        const validator = validators[i];
+        const vname = validator.vname || validator.name;
+        if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
 
-            let result = await validator(value, options.crossValues);
+        let result = await validator(value);
 
-            if (result === false) {
-                result = options.message || ' ';
-            }
+        if (result === false) {
+            result = options.message || ' ';
+        }
 
-            if (result != null && result !== true) {
-                result = ([] as string[]).concat(result).map(str => options.interpolator(str, field));
-                failedRules[vname] = (failedRules[vname] || []).concat(result);
+        if (result != null && result !== true) {
+            result = ([] as string[]).concat(result).map(str => options.interpolator(str, field));
+            failedRules[vname] = (failedRules[vname] || []).concat(result);
 
-                if (options.bails) {
-                    break;
-                }
+            if (options.bails) {
+                break;
             }
         }
     }
@@ -33,7 +34,7 @@ const validate = async (field: string, value: unknown, validators: ValidatorFn[]
     };
 };
 
-const getValue = (value: WatchSource<unknown>) => typeof value === 'function' ? value() : value.value;
+const getValue = (value: WatchSource<unknown>) => typeof value === 'function' ? value() : unref(value);
 
 export function useValidator(
     name: string,
@@ -41,6 +42,8 @@ export function useValidator(
     validators: Validators,
     options: Partial<ValidatorOptions> = {},
 ): DeepReadonly<Validation> {
+    const mergedOptions = { ...defaultOptions, ...options };
+
     const validatorsArray = computed(() => {
         if (isPlainObject(validators)) {
             validators = Object.keys(validators).map((key: string) => {
@@ -53,6 +56,25 @@ export function useValidator(
     });
     validatorsArray.value;
 
+    const onValidate = async (promise: ReturnType<typeof validate>) => {
+        v.reset();
+        v.touch();
+        v.pending = true;
+        try {
+            const { failedRules } = await promise;
+            v.pending = false;
+
+            v.validated = true;
+            v.failedRules = failedRules;
+
+            return Object.keys(failedRules).length === 0;
+        } catch (err) {
+            v.pending = false;
+            warn(err.message);
+        }
+        return false;
+    };
+
     const v: Validation = reactive({
         errors: [] as string[],
         failedRules: {} as Record<string, string[]>,
@@ -60,46 +82,22 @@ export function useValidator(
 
         pending: false,
         invalid: false,
-        dirty: options.immediate,
+        dirty: mergedOptions.immediate,
         validated: false,
 
         reset: () => {
+            v.dirty = false;
             v.failedRules = {};
         },
         validate: async () => {
-            const currentValue = getValue(value);
-            if (!validatorsArray.value || !validatorsArray.value.length) {
-                warn('No validators assigned');
-                return true;
-            }
-
-            v.reset();
-            v.pending = true;
-            try {
-                const { failedRules } = await validate(name, currentValue, validatorsArray.value, { ...defaultOptions, ...options });
-                v.pending = false;
-
-                v.validated = true;
-                v.failedRules = failedRules;
-
-                const isValid = Object.keys(failedRules).length === 0;
-
-                if (isValid) {
-                    v.dirty = false;
-                }
-
-                return isValid;
-            } catch (err) {
-                v.pending = false;
-                warn(err.message);
-            }
-            return false;
+            const promise = validate(name, getValue(value), validatorsArray.value, mergedOptions);
+            return onValidate(promise);
         },
         touch() {
             v.dirty = true;
         },
         setErrors(errors) {
-            v.dirty = true;
+            v.touch();
             v.failedRules = isPlainObject(errors) ? errors : { '': v.errors = ([] as string[]).concat(errors) };
         }
     } as Validation);
@@ -111,27 +109,38 @@ export function useValidator(
     }, { flush: 'sync' });
 
 
-    watch(value, () => {
-        !options.interaction && v.touch();
-        options.interaction !== 'lazy' && v.validate();
-    });
-    if (options.interaction) {
-        // Based on Element UX
-        v.on = {
-            input() {
-                if (options.interaction === 'aggressive') {
-                    v.touch();
-                }
-            },
-            change() {
-                v.touch();
-            },
-            blur() {
-                v.touch();
-                v.validate();
+    if (!options.manual) {
+        const validateAndWatch = () => watch(
+            () => validate(name, getValue(value), validatorsArray.value, mergedOptions),
+            (t, f) => {
+                return onValidate(t);
+            }, {
+                immediate: true
             }
-        };
+        );
+        const unwatch = options.immediate ? validateAndWatch() : watch(value, () => {
+            validateAndWatch();
+            unwatch();
+        });
     }
+
+    // if (options.interaction) {
+    //     // Based on Element UX
+    //     v.on = {
+    //         input() {
+    //             if (options.interaction === 'aggressive') {
+    //                 v.touch();
+    //             }
+    //         },
+    //         change() {
+    //             v.touch();
+    //         },
+    //         blur() {
+    //             v.touch();
+    //             v.validate();
+    //         }
+    //     };
+    // }
 
     // context;
     const context = injectVuluContext();

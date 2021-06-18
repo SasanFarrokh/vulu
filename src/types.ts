@@ -13,17 +13,13 @@ type BaseValidatorOptions = {
     bails: boolean;
     message: string;
     immediate: boolean;
+    manual: boolean;
     model: string;
     interpolator: (msg: string, field: string) => string;
     optional: boolean;
-    crossValues: any
 }
 
-export type ValidatorOptions = BaseValidatorOptions & ({
-    interaction: 'aggressive' | 'lazy' | 'eager';
-} | {
-    interaction?: false;
-})
+export type ValidatorOptions = BaseValidatorOptions;
 
 export type Validation = {
     errors: string[];
@@ -39,8 +35,6 @@ export type Validation = {
     validate: () => Promise<boolean>,
     touch: () => void,
     setErrors: (errors: string | string[] | Record<string, string[]>) => void,
-
-    on?: Record<string, EventListener>
 }
 
 export interface ValidationContext {

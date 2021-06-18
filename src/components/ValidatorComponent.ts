@@ -1,14 +1,29 @@
-import { defineComponent, provide, ref, VNode, nextTick, watchEffect, mergeProps } from 'vue-demi';
+import {
+    defineComponent,
+    provide,
+    ref,
+    VNode,
+    watchEffect,
+    mergeProps,
+    reactive,
+    PropType,
+    toRef,
+    Ref,
+    computed,
+    DeepReadonly
+} from 'vue-demi';
 import { useValidator } from '../validator';
-import { propToListener, VULU } from '../utils';
-import {ValidatorOptions} from '../types';
+import { VULU } from '../utils';
+import { Validation, ValidatorOptions } from '../types';
 import {defaultOptions} from '../defaults';
 
+type Interaction = false | 'lazy' | 'eager' | 'aggressive'
 
 export const Validator = /* #__PURE__ */ defineComponent({
     name: 'Validator',
     props: {
         modelValue: null,
+        crossValues: null,
         validators: null,
         name: null,
         immediate: { type: Boolean, default: defaultOptions.immediate },
@@ -16,46 +31,56 @@ export const Validator = /* #__PURE__ */ defineComponent({
         bails: { type: Boolean, default: defaultOptions.bails },
         message: { type: String, default: defaultOptions.message },
         interpolator: { type: Function, default: defaultOptions.interpolator },
-        interaction: { type: [String, Boolean], default: 'eager' },
         model: { type: String, default: defaultOptions.model },
+        interaction: {
+            type: [String, Boolean] as PropType<Interaction>,
+            validator: (x: string) => [false, 'lazy', 'eager', 'aggressive'].includes(x),
+            default: 'eager'
+        },
     },
     inheritAttrs: false,
     setup(props) {
-        const modelValue = typeof props.modelValue === 'undefined' ? ref(null) : () => props.modelValue;
+        const value = typeof props.modelValue === 'undefined' ? ref(null) : () => props.modelValue;
 
-        const options: ValidatorOptions = {
+        const options: ValidatorOptions = reactive({
             ...defaultOptions,
-        };
+        });
         watchEffect(() => {
-            for (const key in options) {
+            for (const key in defaultOptions) {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 options[key] = props[key];
             }
+            options.manual = props.interaction !== 'aggressive';
         });
 
-        const v = useValidator(props.name, modelValue, props.validators, options);
+        const v = useValidator(props.name, value, props.validators, options);
 
         provide(VULU, v);
+
+        const on = resolveListeners(toRef(props, 'interaction'), v);
 
         return {
             v,
             setErrors: v.setErrors,
-            modelValue,
+            value,
             options,
+            on,
         };
     },
     render() {
         const updateEvent = 'onUpdate:' + this.options.model;
 
-        return this.$slots.default!({ ...this.v }).map((vnode: VNode, i, arr) => {
+        return this.$slots.default!({ ...this.v, on: this.on }).map((vnode: VNode, i, arr) => {
+            /* istanbul ignore if */
+            if (!vnode) return vnode;
             arr.length === 1 && mergeVNodeProps(vnode, this.$attrs);
-            if (typeof this.modelValue !== 'function' && updateEvent in (vnode.props || {})) {
+            if (typeof this.modelValue === 'undefined' && updateEvent in vnode.props!) {
                 mergeVNodeProps(vnode, {
                     [updateEvent]: (v: unknown) => {
-                        (this.modelValue as unknown) = v;
+                        (this.value as unknown) = v;
                     },
-                    // ...propToListener(this.v.on!),
+                    ...this.on,
                 });
                 return vnode;
             }
@@ -65,5 +90,19 @@ export const Validator = /* #__PURE__ */ defineComponent({
 });
 
 function mergeVNodeProps(vnode: VNode, attrs: Record<string, unknown>) {
-    vnode.props = mergeProps(vnode.props || {}, attrs);
+    vnode.props = mergeProps(vnode.props || {}, attrs || {});
+}
+
+function resolveListeners(interaction: Ref<Interaction>, v: DeepReadonly<Validation>) {
+    return computed(() => {
+        const intr = interaction.value;
+        if ([false, 'aggressive'].includes(intr)) return {};
+
+        const events = intr === 'eager' && v.errors.length ? ['input'] : ['change'];
+        const on = {} as Record<string, () => void>;
+        events.forEach(ev => {
+            on['on' + ev[0].toUpperCase() + ev.slice(1)] = () => { v.validate(); };
+        });
+        return on;
+    });
 }

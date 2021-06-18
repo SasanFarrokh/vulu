@@ -124,24 +124,6 @@ export function useValidator(
         });
     }
 
-    // if (options.interaction) {
-    //     // Based on Element UX
-    //     v.on = {
-    //         input() {
-    //             if (options.interaction === 'aggressive') {
-    //                 v.touch();
-    //             }
-    //         },
-    //         change() {
-    //             v.touch();
-    //         },
-    //         blur() {
-    //             v.touch();
-    //             v.validate();
-    //         }
-    //     };
-    // }
-
     // context;
     const context = injectVuluContext();
     if (context) {

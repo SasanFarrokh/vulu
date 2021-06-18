@@ -1,6 +1,6 @@
 # vulu
 [![codecov](https://codecov.io/gh/SasanFarrokh/vulu/branch/master/graph/badge.svg?token=5WP0XGR4TT)](https://codecov.io/gh/SasanFarrokh/vulu)
-[![npm](https://img.shields.io/npm/v/vite-plugin-multi-device?color=f75e5e&style=rounded)](https://npmjs.com/package/vulu)
+[![npm](https://img.shields.io/npm/v/vulu?color=f75e5e&style=rounded)](https://npmjs.com/package/vulu)
 
 Validation Plugin for [Vue 3](https://github.com/vuejs/vue-next)
 

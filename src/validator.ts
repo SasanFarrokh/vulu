@@ -106,7 +106,7 @@ export function useValidator(
         const errors = flatten<string>(Object.values(v.failedRules));
         v.errors = v.dirty ? errors : [];
         v.invalid = !v.validated || errors.length > 0;
-    }, { flush: 'sync' });
+    });
 
 
     if (!options.manual) {
@@ -115,13 +115,15 @@ export function useValidator(
             (t) => {
                 return onValidate(t);
             }, {
-                immediate: true
-            }
+                immediate: true,
+            },
         );
         const unwatch = options.immediate ? validateAndWatch() : watch(value, () => {
             validateAndWatch();
             unwatch();
         });
+    } else if (options.immediate) {
+        v.validate();
     }
 
     // context;

@@ -10,7 +10,8 @@ import {
     toRef,
     Ref,
     computed,
-    DeepReadonly
+    DeepReadonly,
+    nextTick
 } from 'vue-demi';
 import { useValidator } from '../validator';
 import { VULU } from '../utils';
@@ -97,11 +98,13 @@ function resolveListeners(interaction: Ref<Interaction>, v: DeepReadonly<Validat
         const intr = interaction.value;
         if ([false, 'aggressive'].includes(intr)) return {};
 
-        const events = intr === 'eager' && v.errors.length ? ['input'] : ['change'];
+        const events = intr === 'eager' && v.errors.length ? ['input', 'change'] : ['change'];
         const on = {} as Record<string, () => void>;
         events.forEach(ev => {
             on['on' + ev[0].toUpperCase() + ev.slice(1)] = () => {
-                v.validate();
+                nextTick().then(() => {
+                    v.validate();
+                });
             };
         });
         return on;

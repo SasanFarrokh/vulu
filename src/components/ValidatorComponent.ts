@@ -75,15 +75,14 @@ export const Validator = /* #__PURE__ */ defineComponent({
             /* istanbul ignore if */
             if (!vnode) return vnode;
             arr.length === 1 && mergeVNodeProps(vnode, this.$attrs);
-            if (typeof this.modelValue === 'undefined' && updateEvent in vnode.props!) {
-                mergeVNodeProps(vnode, {
+            mergeVNodeProps(vnode, {
+                ...(updateEvent in vnode.props! && this.modelValue === undefined ? {
                     [updateEvent]: (v: unknown) => {
                         (this.value as unknown) = v;
                     },
-                    ...this.on,
-                });
-                return vnode;
-            }
+                } : {}),
+                ...this.on,
+            });
             return vnode;
         });
     },
@@ -101,7 +100,9 @@ function resolveListeners(interaction: Ref<Interaction>, v: DeepReadonly<Validat
         const events = intr === 'eager' && v.errors.length ? ['input'] : ['change'];
         const on = {} as Record<string, () => void>;
         events.forEach(ev => {
-            on['on' + ev[0].toUpperCase() + ev.slice(1)] = () => { v.validate(); };
+            on['on' + ev[0].toUpperCase() + ev.slice(1)] = () => {
+                v.validate();
+            };
         });
         return on;
     });

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6-beta.0](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.7...v0.0.6-beta.0) (2021-06-18)
+
+
+### Features
+
+* add codecov ([69bb07f](https://github.com/SasanFarrokh/vulu/commit/69bb07f3bcaba580242232c696e661bf858c75ce))
+
+
+### Bug Fixes
+
+* remove feat/ci branch from ci ([43fe104](https://github.com/SasanFarrokh/vulu/commit/43fe10456f832b8785e1c07f6781b2dca32ef421))
+
 ### [0.0.6-alpha.7](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.6...v0.0.6-alpha.7) (2021-06-01)
 
 ### [0.0.6-alpha.6](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.5...v0.0.6-alpha.6) (2021-05-26)

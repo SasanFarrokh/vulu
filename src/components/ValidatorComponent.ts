@@ -10,6 +10,7 @@ import {
     toRef,
     Ref,
     DeepReadonly,
+    customRef
 } from 'vue-demi';
 import { useValidator } from '../validator';
 import { VULU } from '../utils';
@@ -38,7 +39,21 @@ export const Validator = /* #__PURE__ */ defineComponent({
     },
     inheritAttrs: false,
     setup(props) {
-        const value = ref();
+        const value: Ref<unknown> = customRef((track, trigger) => {
+            let firstSet = true;
+            let source: unknown = undefined;
+            return {
+                get() {
+                    track();
+                    return source;
+                },
+                set(x) {
+                    !firstSet && x !== source && trigger();
+                    source = x;
+                    firstSet = false;
+                }
+            };
+        });
         watchEffect(() => {
             value.value = props.modelValue;
         }, { flush: 'sync' });
@@ -52,6 +67,7 @@ export const Validator = /* #__PURE__ */ defineComponent({
                 // @ts-ignore
                 options[key] = props[key];
             }
+            options.manual = props.interaction === false;
         });
 
         const v = useValidator(props.name, value, props.validators, options);
@@ -99,6 +115,7 @@ function resolveListeners(interaction: Ref<Interaction>, v: DeepReadonly<Validat
         },
         onBlur() {
             v.unlock();
+            Object.keys(v.failedRules).length > 0 ? v.touch() : v.untouch();
         }
     };
 }

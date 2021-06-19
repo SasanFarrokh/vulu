@@ -15,6 +15,7 @@ type BaseValidatorOptions = {
     immediate: boolean;
     interpolator: (msg: string, field: string) => string;
     optional: boolean;
+    manual: boolean;
 }
 
 export type ValidatorOptions = BaseValidatorOptions;
@@ -33,6 +34,7 @@ export type Validation = {
     reset: () => void;
     validate: () => Promise<boolean>,
     touch: () => void,
+    untouch: () => void,
     setErrors: (errors: string | string[] | Record<string, string[]>) => void,
     lock: () => void;
     unlock: () => void;

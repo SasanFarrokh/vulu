@@ -5,6 +5,7 @@ export const defaultOptions: ValidatorOptions = {
     optional: false,
     message: 'Field is not valid',
     immediate: false,
+    manual: false,
     interpolator: (str, field) => str.replace('$field', field),
 };
 

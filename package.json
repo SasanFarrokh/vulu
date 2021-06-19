@@ -37,6 +37,6 @@
     "vue-demi": "^0.6.0"
   },
   "peerDependencies": {
-    "vue-demi": "^0.5.3"
+    "vue-demi": "*"
   }
 }

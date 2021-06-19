@@ -154,12 +154,8 @@ describe('useValidator', () => {
 
     test('custom set errors validation', async () => {
         const emailInput = ref('');
-        const v = useValidator('field', () => emailInput.value, (...args) => (email as any)(...args), { manual: true });
+        const v = useValidator('field', () => emailInput.value, (...args) => (email as any)(...args));
         emailInput.value = 'test@domain.com';
-
-        await bigNextTick();
-        expect(v.validated).toBeFalsy();
-        expect(email).not.toBeCalled();
 
         await v.validate();
 

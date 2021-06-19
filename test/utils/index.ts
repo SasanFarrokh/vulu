@@ -1,5 +1,4 @@
 import { nextTick } from 'vue';
-import { ValidatorFn } from '../../src';
 
 export  const bigNextTick = () => nextTick().then(() => nextTick());
 

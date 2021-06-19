@@ -9,9 +9,7 @@ import {
     PropType,
     toRef,
     Ref,
-    computed,
     DeepReadonly,
-    nextTick
 } from 'vue-demi';
 import { useValidator } from '../validator';
 import { VULU } from '../utils';
@@ -32,7 +30,6 @@ export const Validator = /* #__PURE__ */ defineComponent({
         bails: { type: Boolean, default: defaultOptions.bails },
         message: { type: String, default: defaultOptions.message },
         interpolator: { type: Function, default: defaultOptions.interpolator },
-        model: { type: String, default: defaultOptions.model },
         interaction: {
             type: [String, Boolean] as PropType<Interaction>,
             validator: (x: string) => [false, 'lazy', 'eager', 'aggressive'].includes(x),
@@ -41,7 +38,10 @@ export const Validator = /* #__PURE__ */ defineComponent({
     },
     inheritAttrs: false,
     setup(props) {
-        const value = typeof props.modelValue === 'undefined' ? ref(null) : () => props.modelValue;
+        const value = ref();
+        watchEffect(() => {
+            value.value = props.modelValue;
+        }, { flush: 'sync' });
 
         const options: ValidatorOptions = reactive({
             ...defaultOptions,
@@ -52,7 +52,6 @@ export const Validator = /* #__PURE__ */ defineComponent({
                 // @ts-ignore
                 options[key] = props[key];
             }
-            options.manual = props.interaction !== 'aggressive';
         });
 
         const v = useValidator(props.name, value, props.validators, options);
@@ -70,20 +69,18 @@ export const Validator = /* #__PURE__ */ defineComponent({
         };
     },
     render() {
-        const updateEvent = 'onUpdate:' + this.options.model;
-
         return this.$slots.default!({ ...this.v, on: this.on }).map((vnode: VNode, i, arr) => {
             /* istanbul ignore if */
             if (!vnode) return vnode;
             arr.length === 1 && mergeVNodeProps(vnode, this.$attrs);
             mergeVNodeProps(vnode, {
-                ...(updateEvent in vnode.props! && this.modelValue === undefined ? {
-                    [updateEvent]: (v: unknown) => {
-                        (this.value as unknown) = v;
-                    },
-                } : {}),
                 ...this.on,
             });
+
+            if ('modelValue' in (vnode.props || {})) {
+                (this.value as unknown) = vnode.props!.modelValue;
+            }
+
             return vnode;
         });
     },
@@ -94,19 +91,14 @@ function mergeVNodeProps(vnode: VNode, attrs: Record<string, unknown>) {
 }
 
 function resolveListeners(interaction: Ref<Interaction>, v: DeepReadonly<Validation>) {
-    return computed(() => {
-        const intr = interaction.value;
-        if ([false, 'aggressive'].includes(intr)) return {};
-
-        const events = intr === 'eager' && v.errors.length ? ['input', 'change'] : ['change'];
-        const on = {} as Record<string, () => void>;
-        events.forEach(ev => {
-            on['on' + ev[0].toUpperCase() + ev.slice(1)] = () => {
-                nextTick().then(() => {
-                    v.validate();
-                });
-            };
-        });
-        return on;
-    });
+    return {
+        onFocus() {
+            if ((interaction.value === 'eager' && !v.errors.length) || interaction.value === 'lazy') {
+                v.lock();
+            }
+        },
+        onBlur() {
+            v.unlock();
+        }
+    };
 }

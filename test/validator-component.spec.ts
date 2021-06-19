@@ -25,10 +25,6 @@ describe('ValidatorComponent', () => {
                     return h('input', {
                         'onInput': (e: InputEvent) => {
                             value.value = (e.target as HTMLInputElement).value;
-                            _v.on.onInput?.(e);
-                        },
-                        'onChange'(e: unknown) {
-                            _v.on.onChange?.(e);
                         },
                         'data-error': _v.errors.join(', ')
                     });
@@ -43,7 +39,7 @@ describe('ValidatorComponent', () => {
 
         await bigNextTick();
 
-        expect(v!.failedRules).toEqual({ required: ['test'], email: ['test'] });
+        expect(v!.failedRules).toEqual({ email: ['test'] });
         expect(input.attributes()['data-error']).toBe(v!.errors.join(', '));
     });
 
@@ -74,7 +70,7 @@ describe('ValidatorComponent', () => {
                                     emit('update:modelValue', x);
                                 }
                             });
-                            return () => h('input', { value: v, onInput: (e: InputEvent) => v.value = (e.target as HTMLInputElement).value });
+                            return () => h('input', { value: v.value, onInput: (e: InputEvent) => v.value = (e.target as HTMLInputElement).value });
                         }
                     }, {
                         modelValue: value.value,
@@ -87,6 +83,7 @@ describe('ValidatorComponent', () => {
         });
 
         expect(v!.errors).toHaveLength(0);
+        expect(email).toHaveBeenLastCalledWith('');
 
         const input = vm.find('input');
         await input.setValue('TEST');
@@ -94,9 +91,13 @@ describe('ValidatorComponent', () => {
         await bigNextTick();
 
         expect(v!.failedRules).toEqual({ email: ['test'] });
+        expect(v!.validated).toEqual(true);
+        expect(email).toHaveBeenLastCalledWith('TEST');
 
+        await input.setValue('');
         await input.setValue('test@domain.com');
         await bigNextTick();
+        expect(email).toHaveBeenLastCalledWith('test@domain.com');
         expect(v!.failedRules).toEqual({});
         expect(v!.invalid).toBeFalsy();
     });

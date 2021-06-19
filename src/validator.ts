@@ -14,7 +14,8 @@ const validate = async (field: string, value: unknown, validators: ValidatorFn[]
         const vname = validator.vname || validator.name;
         if (!vname) warn('Do not use anonymous functions as validators, or pass validators as an object');
 
-        let result = await validator(value);
+        let result = validator(value);
+        if (result instanceof Promise) result = await result;
 
         if (result === false) {
             result = options.message || ' ';
@@ -75,6 +76,8 @@ export function useValidator(
         return false;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    let lockQueue = () => {};
     const v: Validation = reactive({
         errors: [] as string[],
         failedRules: {} as Record<string, string[]>,
@@ -84,12 +87,26 @@ export function useValidator(
         invalid: false,
         dirty: mergedOptions.immediate,
         validated: false,
+        locked: false,
+
+        lock: () => {
+            v.locked = true;
+        },
+        unlock: () => {
+            v.locked = false;
+            lockQueue();
+        },
 
         reset: () => {
             v.dirty = false;
             v.failedRules = {};
         },
         validate: async () => {
+            v.touch();
+            if (v.locked) {
+                lockQueue = v.validate;
+                return;
+            }
             const promise = validate(name, getValue(value), validatorsArray.value, mergedOptions);
             return onValidate(promise);
         },
@@ -106,25 +123,24 @@ export function useValidator(
         const errors = flatten<string>(Object.values(v.failedRules));
         v.errors = v.dirty ? errors : [];
         v.invalid = !v.validated || errors.length > 0;
+    }, { flush: 'sync' });
+
+
+    const validateAndWatch = () => watch(
+        () => {
+            console.log('watching', getValue(value), v.locked);
+            return !v.locked ? validate(name, getValue(value), validatorsArray.value, mergedOptions) : null;
+        },
+        (t) => {
+            return t && onValidate(t);
+        }, {
+            immediate: true,
+        },
+    );
+    const unwatch = options.immediate ? validateAndWatch() : watch(value, () => {
+        unwatch();
+        validateAndWatch();
     });
-
-
-    if (!options.manual) {
-        const validateAndWatch = () => watch(
-            () => validate(name, getValue(value), validatorsArray.value, mergedOptions),
-            (t) => {
-                return onValidate(t);
-            }, {
-                immediate: true,
-            },
-        );
-        const unwatch = options.immediate ? validateAndWatch() : watch(value, () => {
-            validateAndWatch();
-            unwatch();
-        });
-    } else if (options.immediate) {
-        v.validate();
-    }
 
     // context;
     const context = injectVuluContext();

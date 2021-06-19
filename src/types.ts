@@ -13,8 +13,6 @@ type BaseValidatorOptions = {
     bails: boolean;
     message: string;
     immediate: boolean;
-    manual: boolean;
-    model: string;
     interpolator: (msg: string, field: string) => string;
     optional: boolean;
 }
@@ -30,11 +28,14 @@ export type Validation = {
     invalid: boolean;
     dirty: boolean;
     validated: boolean;
+    locked: boolean;
 
     reset: () => void;
     validate: () => Promise<boolean>,
     touch: () => void,
     setErrors: (errors: string | string[] | Record<string, string[]>) => void,
+    lock: () => void;
+    unlock: () => void;
 }
 
 export interface ValidationContext {

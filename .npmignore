@@ -11,3 +11,4 @@ jest.config.js
 pnpm-workspace.yaml
 todo
 tsconfig.json
+.github

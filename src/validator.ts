@@ -128,7 +128,6 @@ export function useValidator(
 
     const validateAndWatch = () => watch(
         () => {
-            console.log('watching', getValue(value), v.locked);
             return !v.locked ? validate(name, getValue(value), validatorsArray.value, mergedOptions) : null;
         },
         (t) => {

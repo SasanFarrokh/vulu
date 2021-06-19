@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6-beta.1](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-beta.0...v0.0.6-beta.1) (2021-06-19)
+
+
+### Bug Fixes
+
+* bugs ([7b6d4ff](https://github.com/SasanFarrokh/vulu/commit/7b6d4ff0481def96a9b2288e6039d91a32f709c0))
+* modelValue update ([a299920](https://github.com/SasanFarrokh/vulu/commit/a2999206b706eca091d8a1dd640a295973bb9bfa))
+* nextTick validation ([651ea80](https://github.com/SasanFarrokh/vulu/commit/651ea807c1ea86db67ae6cee222770c0d4a9fced))
+* update readme.md npm icon ([ce2046f](https://github.com/SasanFarrokh/vulu/commit/ce2046faac5f8e9357584e9377bfaac5f1f2108d))
+
 ### [0.0.6-beta.0](https://github.com/SasanFarrokh/vulu/compare/v0.0.6-alpha.7...v0.0.6-beta.0) (2021-06-18)
 
 

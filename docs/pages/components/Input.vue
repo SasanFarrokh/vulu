@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { inject, computed, unref } from 'vue-demi';
+import { inject, computed, unref } from 'vue';
 import { VULU } from 'vulu';
 
 export default {

@@ -14,7 +14,7 @@
 <script setup>
 import Input from "../../components/Input.vue";
 import { useValidator } from 'vulu'
-import { ref, reactive } from 'vue-demi'
+import { ref, reactive } from 'vue'
 
 const options = reactive({ optional: false, immediate: true })
 

@@ -11,7 +11,7 @@ import {
     Ref,
     DeepReadonly,
     customRef
-} from 'vue-demi';
+} from 'vue';
 import { useValidator } from '../validator';
 import { VULU } from '../utils';
 import { Validation, ValidatorOptions } from '../types';

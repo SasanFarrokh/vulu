@@ -1,4 +1,4 @@
-import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, onBeforeUnmount, unref } from 'vue-demi';
+import { reactive, watchEffect, watch, WatchSource, readonly, DeepReadonly, computed, onBeforeUnmount, unref } from 'vue';
 import {flatten, injectVuluContext, isPlainObject, warn} from './utils';
 import {Validation, ValidatorFn, ValidatorOptions, Validators} from './types';
 import {defaultOptions} from './defaults';

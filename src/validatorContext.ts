@@ -1,5 +1,5 @@
 import {ValidationContext} from './types';
-import {inject, provide, reactive, watchEffect, onBeforeUnmount} from 'vue-demi';
+import {inject, provide, reactive, watchEffect, onBeforeUnmount} from 'vue';
 import {VULU_CONTEXT} from './utils';
 
 export function useValidatorContext (): ValidationContext {

@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue-demi';
+import { ref, reactive } from 'vue';
 import { useValidator } from 'vulu';
 
 function minLength(x) {

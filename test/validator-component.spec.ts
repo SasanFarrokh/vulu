@@ -1,4 +1,4 @@
-import { ref, computed, h } from 'vue-demi';
+import { ref, computed, h } from 'vue';
 import { Validator } from '../src';
 import {Validation, ValidatorFn} from '../src/types';
 import { mount } from '@vue/test-utils';
